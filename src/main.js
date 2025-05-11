@@ -1,24 +1,37 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+import "./style.css";
+import { setupCalculatorUI } from "./ui.js";
+import { hasConsecutiveOperators, evaluateExpression } from "./util.js";
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+const operators = ["+", "-", "*", "/", "="];
+const calculatorDisplay = setupCalculatorUI(handleButtonClick);
 
-setupCounter(document.querySelector('#counter'))
+function handleButtonClick(buttonValue) {
+  let current = calculatorDisplay.value;
+
+  if (buttonValue === "C") {
+    calculatorDisplay.value = "";
+    return;
+  }
+
+  if (current.includes("=")) {
+    current = "";
+    calculatorDisplay.value = "";
+  }
+
+  if (current === "" && ["+", "*", "/", "="].includes(buttonValue)) return;
+
+  const lastChar = current.slice(-1);
+  if (operators.includes(lastChar) && operators.includes(buttonValue)) return;
+
+  if (buttonValue === "=") {
+    if (hasConsecutiveOperators(current, operators)) {
+      calculatorDisplay.value = "Error";
+      return;
+    }
+
+    const result = evaluateExpression(current);
+    calculatorDisplay.value = `${current}=${result}`;
+  } else {
+    calculatorDisplay.value += buttonValue;
+  }
+}
